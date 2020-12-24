@@ -13,14 +13,13 @@ Todo List:
 
 1. Implement this naively in python. Do a sanity check if something better exists. (DONE)
 2. Implement naively in cpp (DONE)
-3. Implement with multi threads 
+3. Implement with multi threads
 4. Implement with cuda.
 5. Write both a forward and backward function.
 
-# Future targets.
-1. Add distributed torch extension.
-2. Add distributed cuda extension.
+# Future work.
 
-# Some notes:
-# Memory management in python and tensorflow.
-# Using python and cythonize.
+1. Add distributed torch extension.
+2. Add distributed gpu extension.
+3. Support autograd function.
+4. Study the memory management in python. 
