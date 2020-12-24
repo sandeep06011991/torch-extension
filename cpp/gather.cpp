@@ -30,6 +30,6 @@ torch::Tensor gather_reduce(torch::Tensor a,torch::Tensor b){
 }
 
 
-PYBIND11_MODULE(custom_kernels, m) {
+PYBIND11_MODULE(c_kernel, m) {
   m.def("cpu_gather", &gather_reduce, "gather_reduce");
 }

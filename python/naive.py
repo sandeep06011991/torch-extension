@@ -1,7 +1,7 @@
 import sys
 sys.path.append("../cpp")
 import torch, time
-import custom_kernels
+import c_kernel, cuda_kernel
 
 # s1,s2 - shape of A matrix
 # s3 - size of gather matrix.
@@ -26,7 +26,7 @@ def naive(s1,s2,s3,device):
           t = t + a[b[i][k],:]
       assert(torch.all(torch.eq(t,s[i,:])))
   print("Success !!")
-  print("total time {}".format(e_time - s_time))
+  print("total time direct {} {}".format(device,e_time - s_time))
 
 def custom_cpp_operator(s1,s2,s3):
     a = torch.rand((s1,s2))
@@ -34,7 +34,7 @@ def custom_cpp_operator(s1,s2,s3):
     # b = torch.ones((s1,s3)).int()
     b = torch.randint(0,s1,(s1,s3))
     s_time = time.time()
-    s = custom_kernels.cpu_gather(a,b)
+    s = c_kernel.cpu_gather(a,b)
     e_time = time.time()
     # validation scriptself
     for i in range(s1):
@@ -49,13 +49,12 @@ def custom_cuda_operator(s1,s2,s3):
     a = torch.rand((s1,s2)).to('cuda')
     b = torch.randint(0,s1,(s1,s3)).to('cuda')
     s_time = time.time()
-    s = custom_kernels.gpu_gather(a,b)
+    s = cuda_kernel.gather_cuda(a,b)
     torch.cuda.synchronize()
     e_time = time.time()
-    s = s.to('cpu')
     # validation scriptself
     for i in range(s1):
-        t = torch.zeros((s2)).float()
+        t = torch.zeros((s2)).to('cuda')
         for k in range(s3):
             t = t + a[b[i][k],:]
         assert(torch.all(torch.eq(t,s[i,:])))
@@ -63,6 +62,7 @@ def custom_cuda_operator(s1,s2,s3):
     print("total time for custom gpu operator {}".format(e_time - s_time))
 
 
-# naive(1000,100,1000,'cuda')
-# naive(1000,100,1000,'cpu')
-custom_cpp_operator(5,5,5)
+naive(100,32,100,'cuda')
+naive(100,32,100,'cpu')
+custom_cpp_operator(100,32,100)
+custom_cuda_operator(100,32,100)
